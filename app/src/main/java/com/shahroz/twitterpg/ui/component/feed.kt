@@ -13,19 +13,18 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import com.shahroz.twitterpg.R
-import com.shahroz.twitterpg.data.mapper.TweetMapper
 import com.shahroz.twitterpg.data.model.Person
+import com.shahroz.twitterpg.data.model.Tweet
 import com.shahroz.twitterpg.ui.component.profiles.ProfilePicture
 import com.shahroz.twitterpg.ui.component.profiles.ProfilePictureSizes
 import com.shahroz.twitterpg.ui.component.tweets.TweetItem
 import com.shahroz.twitterpg.ui.theme.twitterColor
-import twitter4j.Status
 
 @Composable
 fun TwitterHome(
     modifier: Modifier = Modifier,
     user: Person,
-    tweets: LazyPagingItems<Status>,
+    tweets: LazyPagingItems<Tweet>,
     onMessagesClick: () -> Unit,
     onRetweetClick: () -> Unit,
     onLikesClick: () -> Unit,
@@ -80,12 +79,11 @@ fun TwitterHome(
             )
         },
         content = {
-            val mapper = TweetMapper()
             LazyColumn {
                 items(tweets) {
                     it?.let { status ->
                         TweetItem(
-                            status = mapper.mapToDomainModel(status),
+                            status = status,
                             onMessagesClick = onMessagesClick,
                             onRetweetClick = onRetweetClick,
                             onLikesClick = onLikesClick,

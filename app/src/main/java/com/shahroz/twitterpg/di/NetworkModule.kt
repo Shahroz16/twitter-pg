@@ -1,5 +1,6 @@
 package com.shahroz.twitterpg.di
 
+import com.shahroz.twitterpg.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,8 +19,8 @@ object NetworkModule {
     fun provideConfig(): ConfigurationBuilder {
         return ConfigurationBuilder()
             .setDebugEnabled(true)
-            .setOAuthConsumerKey("8csk2ahkDkzRFG0YYRHjKVWbF")
-            .setOAuthConsumerSecret("U1C3AfGaGh5mIkZ2dglt3JiUlV3RD6kncPsNMxDDZITgtk14Nl")
+            .setOAuthConsumerKey(BuildConfig.CONSUMER_KEY)
+            .setOAuthConsumerSecret(BuildConfig.CONSUMER_SECRET)
             .setIncludeEmailEnabled(true)
     }
 

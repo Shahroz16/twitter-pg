@@ -2,20 +2,20 @@ package com.shahroz.twitterpg.data.source
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.shahroz.twitterpg.data.model.Tweet
 import com.shahroz.twitterpg.data.repositories.TwitterRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import twitter4j.Status
 import javax.inject.Inject
 
 class TimeLineDateSource @Inject constructor(private val twitterRepository: TwitterRepository) :
-    PagingSource<Int, Status>() {
+    PagingSource<Int, Tweet>() {
 
-    override fun getRefreshKey(state: PagingState<Int, Status>): Int? {
+    override fun getRefreshKey(state: PagingState<Int, Tweet>): Int? {
         return state.anchorPosition
     }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Status> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Tweet> {
         return try {
             withContext(Dispatchers.IO) {
                 val nextPage = params.key ?: 1

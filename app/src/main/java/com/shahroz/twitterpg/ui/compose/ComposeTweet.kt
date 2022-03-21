@@ -40,7 +40,6 @@ import com.shahroz.twitterpg.ui.component.profiles.ProfilePictureSizes
 import com.shahroz.twitterpg.ui.home.HomeViewModel
 import com.shahroz.twitterpg.util.Keyboard
 import com.shahroz.twitterpg.util.ModalBottonSheetKeyboardAsState
-import twitter4j.User
 
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
@@ -55,35 +54,48 @@ fun ComposeTweet(
 ) {
 
     var selectedImage by remember { mutableStateOf<Uri?>(null) }
+    val isLoading = homeViewModel.isLoading.collectAsState()
 
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier.fillMaxHeight(),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        StatusView(
-            image = user.image,
-            state = state,
-            selectedImage = selectedImage,
-            onCloseClicked = onCloseClicked,
-            sendTweet = { text, uri ->
-                homeViewModel.sendTweet(text, uri, context)
-                onNewTweet()
-            },
-            onImageRemoved = {
-                selectedImage = null
-            },
-        )
-        if (selectedImage == null) {
-            AttachmentView(
-                onImageSelected = {
-                    selectedImage = it
+    Box {
+        Column(
+            modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            StatusView(
+                image = user.image,
+                state = state,
+                selectedImage = selectedImage,
+                onCloseClicked = onCloseClicked,
+                sendTweet = { text, uri ->
+                    homeViewModel.sendTweet(text, uri, context) {
+                        selectedImage = null
+                        onNewTweet()
+                    }
                 },
-                goToSettings = goToSettings,
+                onImageRemoved = {
+                    selectedImage = null
+                },
+            )
+            if (selectedImage == null) {
+                AttachmentView(
+                    onImageSelected = {
+                        selectedImage = it
+                    },
+                    goToSettings = goToSettings,
+                )
+            }
+        }
+        if (isLoading.value) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.Center)
             )
         }
     }
+
 }
 
 @Composable
@@ -142,11 +154,14 @@ fun StatusView(
             CloseButton(onCloseClicked)
             TweetButton(tweetText, selectedImage) {
                 runCatching {
-                    sendTweet(tweetText, selectedImage)
+                    val text = tweetText
+                    tweetText = ""
+                    sendTweet(text, selectedImage)
                 }
             }
         }
         AvatarWithTextField(
+            text = tweetText,
             image = image,
             state = state,
             onCloseClicked = onCloseClicked
@@ -193,12 +208,12 @@ const val tweetCharCount = 280
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun AvatarWithTextField(
+    text: String,
     image: String?,
     state: ModalBottomSheetState,
     onCloseClicked: () -> Unit,
     onTextChange: (String) -> Unit,
 ) {
-    var text by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
 
     val isKeyboardOpen by ModalBottonSheetKeyboardAsState(state)
@@ -216,7 +231,6 @@ private fun AvatarWithTextField(
             value = text,
             onValueChange = {
                 if (it.length <= tweetCharCount) {
-                    text = it
                     onTextChange.invoke(it)
                 }
             },
@@ -234,7 +248,7 @@ private fun AvatarWithTextField(
                         modifier = Modifier.fillMaxWidth()
                     )
                 } else {
-                    Column() {
+                    Column {
                         innerTextField()
                         Spacer(modifier = Modifier.height(16.dp))
                         BasicText(

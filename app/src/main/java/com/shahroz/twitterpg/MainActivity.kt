@@ -30,7 +30,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
-import twitter4j.Status
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -67,7 +66,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterialApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
     @Composable
     fun TwitterScreen(
-        tweetsFlow: Flow<PagingData<Status>>,
+        tweetsFlow: Flow<PagingData<Tweet>>,
         userState: Person,
     ) {
         val modalBottomSheetState =

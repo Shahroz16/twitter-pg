@@ -1,9 +1,13 @@
 package com.shahroz.twitterpg.data.repositories
 
+import android.util.Log
 import com.shahroz.twitterpg.data.mapper.TweetMapper
 import com.shahroz.twitterpg.data.mapper.UserMapper
 import com.shahroz.twitterpg.data.model.Person
-import twitter4j.*
+import com.shahroz.twitterpg.data.model.Tweet
+import twitter4j.Paging
+import twitter4j.StatusUpdate
+import twitter4j.Twitter
 import twitter4j.auth.AccessToken
 import twitter4j.auth.RequestToken
 import java.io.File
@@ -11,14 +15,14 @@ import javax.inject.Inject
 
 
 interface TwitterRepository {
-    suspend fun getTimeLine(page: Int): ResponseList<Status>
+    suspend fun getTimeLine(page: Int): List<Tweet>
     fun isAuthenticated(): Boolean
     fun setAuthentication(token: String, secret: String)
     suspend fun verifyCredentials(): Person
     suspend fun getOAuthRequestToken(): RequestToken
     suspend fun getOAuthAccessToken(oauthVerifier: String): AccessToken
-    suspend fun updateTextTweet(tweetText: String): Status
-    suspend fun updateTextWithImageTweet(status: String, path: String): Status
+    suspend fun updateTextTweet(tweetText: String): Tweet
+    suspend fun updateTextWithImageTweet(status: String, path: String): Tweet
 }
 
 class TwitterRepositoryImp @Inject constructor(
@@ -27,9 +31,19 @@ class TwitterRepositoryImp @Inject constructor(
     val tweetMapper: TweetMapper
 ) : TwitterRepository {
 
-    override suspend fun getTimeLine(page: Int): ResponseList<Status> {
+    override suspend fun getTimeLine(page: Int): List<Tweet> {
+        Log.v("paging", "$page")
         val paging = Paging(page)
-        return twitter.getHomeTimeline(paging)
+
+        val result = kotlin.runCatching {
+            twitter.getHomeTimeline(paging)
+        }
+        val list = if (result.isSuccess) {
+            tweetMapper.toDomainList(result.getOrNull() ?: emptyList())
+        } else {
+            tweetMapper.toDomainList(emptyList())
+        }
+        return list
     }
 
     override fun isAuthenticated(): Boolean {
@@ -53,15 +67,15 @@ class TwitterRepositoryImp @Inject constructor(
         return twitter.getOAuthAccessToken(oauthVerifier)
     }
 
-    override suspend fun updateTextTweet(tweetText: String): Status {
-        return twitter.updateStatus(tweetText)
+    override suspend fun updateTextTweet(tweetText: String): Tweet {
+        return tweetMapper.mapToDomainModel(twitter.updateStatus(tweetText))
     }
 
-    override suspend fun updateTextWithImageTweet(status: String, path: String): Status {
+    override suspend fun updateTextWithImageTweet(status: String, path: String): Tweet {
         val media = twitter.uploadMedia(File(path))
         val update = StatusUpdate(status)
         update.setMediaIds(media.mediaId)
-        return twitter.updateStatus(update)
+        return tweetMapper.mapToDomainModel(twitter.updateStatus(update))
     }
 
 }

@@ -11,6 +11,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.shahroz.twitterpg.data.model.Person
+import com.shahroz.twitterpg.data.model.Tweet
 import com.shahroz.twitterpg.data.repositories.PreferenceRepository
 import com.shahroz.twitterpg.data.repositories.TwitterRepository
 import com.shahroz.twitterpg.data.source.TimeLineDateSource
@@ -20,10 +21,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import twitter4j.Status
 import javax.inject.Inject
+
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -33,7 +33,7 @@ class HomeViewModel @Inject constructor(
 
     private var timeLineDateSource: TimeLineDateSource = TimeLineDateSource(twitterRepository)
 
-    val tweets: Flow<PagingData<Status>> = Pager(PagingConfig(pageSize = 10)) {
+    val tweets: Flow<PagingData<Tweet>> = Pager(PagingConfig(pageSize = 10)) {
         timeLineDateSource
     }.flow.cachedIn(viewModelScope)
 
@@ -42,6 +42,9 @@ class HomeViewModel @Inject constructor(
 
     private val _displayTwitterLogin = MutableStateFlow<String?>(null)
     val displayTwitterLogin = _displayTwitterLogin
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading
 
     init {
         viewModelScope.launch {
@@ -94,19 +97,22 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun sendTweet(tweetText: String, uri: Uri?, context: Context): Status {
-        return runBlocking(Dispatchers.IO) {
+    fun sendTweet(tweetText: String, uri: Uri?, context: Context, actionOnSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _isLoading.value = true
             if (uri == null) {
                 twitterRepository.updateTextTweet(tweetText)
             } else {
                 val returnCursor: Cursor? =
                     context.contentResolver.query(uri, null, null, null, null)
-                val columnIndex = returnCursor?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-                returnCursor?.moveToFirst();
+                val columnIndex = returnCursor?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+                returnCursor?.moveToFirst()
                 val path = columnIndex?.let { returnCursor.getString(it) } ?: uri.path ?: ""
-
                 twitterRepository.updateTextWithImageTweet(tweetText, path)
             }
+            _isLoading.value = false
+            actionOnSuccess()
+
         }
     }
 
