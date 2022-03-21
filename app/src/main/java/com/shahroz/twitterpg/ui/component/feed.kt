@@ -13,17 +13,18 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import com.shahroz.twitterpg.R
+import com.shahroz.twitterpg.data.mapper.TweetMapper
+import com.shahroz.twitterpg.data.model.Person
 import com.shahroz.twitterpg.ui.component.profiles.ProfilePicture
 import com.shahroz.twitterpg.ui.component.profiles.ProfilePictureSizes
 import com.shahroz.twitterpg.ui.component.tweets.TweetItem
 import com.shahroz.twitterpg.ui.theme.twitterColor
 import twitter4j.Status
-import twitter4j.User
 
 @Composable
 fun TwitterHome(
     modifier: Modifier = Modifier,
-    user: User?,
+    user: Person,
     tweets: LazyPagingItems<Status>,
     onMessagesClick: () -> Unit,
     onRetweetClick: () -> Unit,
@@ -48,13 +49,13 @@ fun TwitterHome(
                 elevation = 8.dp,
                 navigationIcon = {
                     ProfilePicture(
-                        profileImageUrl = user?.profileImageURL ?: "",
+                        profileImageUrl = user.image,
                         size = ProfilePictureSizes.small,
                         modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
                     )
                 },
                 actions = {
-                    if (user != null) {
+                    if (user.isValid()) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
@@ -79,11 +80,12 @@ fun TwitterHome(
             )
         },
         content = {
+            val mapper = TweetMapper()
             LazyColumn {
                 items(tweets) {
                     it?.let { status ->
                         TweetItem(
-                            status = status,
+                            status = mapper.mapToDomainModel(status),
                             onMessagesClick = onMessagesClick,
                             onRetweetClick = onRetweetClick,
                             onLikesClick = onLikesClick,

@@ -10,6 +10,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.shahroz.twitterpg.data.model.Person
 import com.shahroz.twitterpg.data.repositories.PreferenceRepository
 import com.shahroz.twitterpg.data.repositories.TwitterRepository
 import com.shahroz.twitterpg.data.source.TimeLineDateSource
@@ -22,7 +23,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import twitter4j.Status
-import twitter4j.User
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,7 +37,7 @@ class HomeViewModel @Inject constructor(
         timeLineDateSource
     }.flow.cachedIn(viewModelScope)
 
-    private val _isLoggedInStateFlow = MutableStateFlow<User?>(null)
+    private val _isLoggedInStateFlow = MutableStateFlow(Person())
     val isLoggedInStateFlow = _isLoggedInStateFlow
 
     private val _displayTwitterLogin = MutableStateFlow<String?>(null)
@@ -53,7 +53,7 @@ class HomeViewModel @Inject constructor(
                         token = token,
                         secret = secret
                     )
-                    if (user != null) {
+                    if (user.isValid()) {
                         _isLoggedInStateFlow.value = user
                     } else {
                         oAuthRequestToken()
@@ -62,8 +62,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getLoggedInUser(token: String?, secret: String?): User? {
-        if (token == null || secret == null) return null
+    private suspend fun getLoggedInUser(token: String?, secret: String?): Person {
+        if (token == null || secret == null) return Person()
         if (!twitterRepository.isAuthenticated()) {
             twitterRepository.setAuthentication(token, secret)
         }
@@ -74,7 +74,7 @@ class HomeViewModel @Inject constructor(
             user
         } catch (e: Exception) {
             e.printStackTrace()
-            null
+            Person()
         }
     }
 

@@ -18,6 +18,8 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.lifecycle.lifecycleScope
 import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.shahroz.twitterpg.data.model.Person
+import com.shahroz.twitterpg.data.model.Tweet
 import com.shahroz.twitterpg.ui.component.TwitterHome
 import com.shahroz.twitterpg.ui.compose.ComposeTweet
 import com.shahroz.twitterpg.ui.home.HomeViewModel
@@ -29,7 +31,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import twitter4j.Status
-import twitter4j.User
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -41,7 +42,7 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launchWhenCreated {
             homeViewModel.isLoggedInStateFlow.collect { isLoggedInUser ->
                 setContent {
-                    val isLoggedIn = isLoggedInUser != null
+                    val isLoggedIn = isLoggedInUser.isValid()
                     TwitterPGTheme {
                         TwitterScreen(
                             tweetsFlow = if (isLoggedIn) homeViewModel.tweets else flowOf(),
@@ -67,7 +68,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun TwitterScreen(
         tweetsFlow: Flow<PagingData<Status>>,
-        userState: User?,
+        userState: Person,
     ) {
         val modalBottomSheetState =
             rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)

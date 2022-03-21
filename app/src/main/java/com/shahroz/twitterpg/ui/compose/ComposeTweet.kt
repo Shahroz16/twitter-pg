@@ -34,6 +34,7 @@ import com.himanshoe.pluck.PluckConfiguration
 import com.himanshoe.pluck.theme.PluckDimens
 import com.himanshoe.pluck.ui.Pluck
 import com.himanshoe.pluck.ui.permission.Permission
+import com.shahroz.twitterpg.data.model.Person
 import com.shahroz.twitterpg.ui.component.profiles.ProfilePicture
 import com.shahroz.twitterpg.ui.component.profiles.ProfilePictureSizes
 import com.shahroz.twitterpg.ui.home.HomeViewModel
@@ -45,7 +46,7 @@ import twitter4j.User
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ComposeTweet(
-    user: User?,
+    user: Person,
     onCloseClicked: () -> Unit,
     onNewTweet: () -> Unit,
     goToSettings: () -> Unit,
@@ -62,7 +63,7 @@ fun ComposeTweet(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         StatusView(
-            image = user?.profileImageURL,
+            image = user.image,
             state = state,
             selectedImage = selectedImage,
             onCloseClicked = onCloseClicked,
@@ -146,7 +147,9 @@ fun StatusView(
             }
         }
         AvatarWithTextField(
-            image, state, onCloseClicked
+            image = image,
+            state = state,
+            onCloseClicked = onCloseClicked
         ) { tweet ->
             tweetText = tweet
         }
@@ -293,7 +296,7 @@ private fun TweetButton(
 @Composable
 fun PreviewComposeTweet() {
     ComposeTweet(
-        user = null,
+        user = Person(),
         onNewTweet = {},
         goToSettings = {},
         onCloseClicked = {},

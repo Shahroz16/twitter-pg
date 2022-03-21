@@ -2,6 +2,8 @@ package com.shahroz.twitterpg.di
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import com.shahroz.twitterpg.data.mapper.TweetMapper
+import com.shahroz.twitterpg.data.mapper.UserMapper
 import com.shahroz.twitterpg.data.repositories.PreferenceRepository
 import com.shahroz.twitterpg.data.repositories.PreferenceRepositoryImp
 import com.shahroz.twitterpg.data.repositories.TwitterRepository
@@ -17,8 +19,16 @@ import twitter4j.Twitter
 class RepositoryModule {
 
     @Provides
-    fun provideTwitterRepository(twitter: Twitter): TwitterRepository {
-        return TwitterRepositoryImp(twitter = twitter)
+    fun provideTwitterRepository(
+        twitter: Twitter,
+        userMapper: UserMapper,
+        tweetMapper: TweetMapper
+    ): TwitterRepository {
+        return TwitterRepositoryImp(
+            twitter = twitter,
+            userMapper = userMapper,
+            tweetMapper = tweetMapper
+        )
     }
 
     @Provides
