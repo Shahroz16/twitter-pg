@@ -140,20 +140,3 @@ class MainActivity : ComponentActivity() {
     }
 
 }
-
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun DefaultPreview4() {
-//    TwitterPGTheme {
-//        TwitterHome(
-//            tweets = flowOf<LazyPagingItems<Status>>(PagingData<Status>()).collectAsLazyPagingItems(),
-//            user = null,
-//            onMessagesClick = { /*TODO*/ },
-//            onRetweetClick = { /*TODO*/ },
-//            onLikesClick = { /*TODO*/ },
-//            onShareClick = { /*TODO*/ },
-//            onNewTweetClicked = { /*TODO*/ }
-//        )
-//    }
-//}
