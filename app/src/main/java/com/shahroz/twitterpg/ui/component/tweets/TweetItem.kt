@@ -40,7 +40,7 @@ fun TweetItem(
                 profileName = status.author,
                 isVerified = status.isAuthorVerified,
                 handle = status.handle,
-                time = status.createdAt.time.toTimeAgo()
+                time = status.createdAt.toTimeAgo()
             )
             Text(text = status.text, style = typography.body1)
             TweetImage(

@@ -10,7 +10,7 @@ class TweetMapper : DomainMapper<Status?, Tweet> {
             Tweet(
                 id = model.id.toInt(),
                 text = model.text,
-                createdAt = model.createdAt,
+                createdAt = model.createdAt.time,
                 author = model.user.name,
                 isAuthorVerified = model.user.isVerified,
                 authorImageId = model.user.profileImageURL,

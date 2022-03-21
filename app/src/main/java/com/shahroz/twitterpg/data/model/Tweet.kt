@@ -1,14 +1,12 @@
 package com.shahroz.twitterpg.data.model
 
-import java.util.*
-
 data class Tweet(
     val id: Int = -1,
     val text: String = "",
     val author: String = "",
     val isAuthorVerified: Boolean =  false,
     val handle: String = "",
-    val createdAt: Date = Date(),
+    val createdAt: Long = 0,
     val authorImageId: String = "",
     val likesCount: Int = 0,
     val commentsCount: Int = 0,
